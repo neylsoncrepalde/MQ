@@ -16,7 +16,7 @@ Na amostragem por conglomerados, não seleciono um elemento de cada conglomerado
 
 A amostragem por conglomerados é ruim porque as unidades dentro do conglomerado tendem a ser parecidas. Como não seleciono um elemento de cada conglomerado como faço na amostragem estratificada, estou perdendo informação.
 
-$$m_{AC} = m_{AAS} X EPA $$
+$$m_{AC} = m_{AAS} \times EPA $$
 
 Onde mAC é a amostra obtida por conglomerados, mAAS é a amostra obtida por amostragem aleatória simples e EPA é o efeito do plano de amostragem (*design effect - DEFF*).
 
