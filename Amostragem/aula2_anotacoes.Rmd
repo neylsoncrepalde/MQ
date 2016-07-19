@@ -1,0 +1,14 @@
+---
+title: "MQ - Amostragem"
+author: "Neylson Crepalde"
+date: "Tuesday, July 19, 2016"
+output: html_document
+---
+
+##Amostragem com probabilidades desiguais
+
+Pesquisar por *PPS Sampling*, amostra por tamanhos.
+
+Os pesos amostrais são, em raciocínio, calculados como o inverso das probabilidades de seleção de cada caso na amostra.
+Os pesos amostrais também podem incorporar outras informações auxiliares como ajustes para *não-respostas completas* e uso de *informações auxiliares*. Usar um calibrador para informações auxiliares são usados pelos principais centros de pesquisa do mundo.
+
