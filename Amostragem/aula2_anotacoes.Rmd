@@ -12,3 +12,20 @@ Pesquisar por *PPS Sampling*, amostra por tamanhos.
 Os pesos amostrais são, em raciocínio, calculados como o inverso das probabilidades de seleção de cada caso na amostra.
 Os pesos amostrais também podem incorporar outras informações auxiliares como ajustes para *não-respostas completas* e uso de *informações auxiliares*. Usar um calibrador para informações auxiliares são usados pelos principais centros de pesquisa do mundo.
 
+Na amostragem por conglomerados, não seleciono um elemento de cada conglomerado (como faço na amostragem estratificada selecionando pelo menos um elemento de cada estrato) mas seleciono alguns conglomerados inteiros. Posso selecionar alguns quarteirões de uma cidade, por exemplo.
+
+A amostragem por conglomerados é ruim porque as unidades dentro do conglomerado tendem a ser parecidas. Como não seleciono um elemento de cada conglomerado como faço na amostragem estratificada, estou perdendo informação.
+
+$$m_{AC} = m_{AAS} X EPA $$
+
+Onde mAC é a amostra obtida por conglomerados, mAAS é a amostra obtida por amostragem aleatória simples e EPA é o efeito do plano de amostragem (*design effect - DEFF*).
+
+A unidade elementar é o último nível de análise.
+
+Podemos usar o pacote `survey` para analisar dados com planos amostrais complexos.
+
+```{r}
+library(survey)
+```
+
+Tanto maior a variância dos pesos amostrais, maior a importância e considerá-los nas análises.
