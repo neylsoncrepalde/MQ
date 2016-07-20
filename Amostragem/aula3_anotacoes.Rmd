@@ -1,0 +1,108 @@
+---
+title: "MQ - Amostragem - Aula 3"
+author: "Neylson Crepalde"
+date: "Wednesday, July 20, 2016"
+output: 
+    html_document:
+      highlight: tango
+---
+
+Este tutorial é uma replicação da disciplina "Técnicas de Amostragem" ministrada pelo prof. Marcel Vieira originalmente feita no STATA. No `R` vamos trabalhar com o pacote **survey**. Para ler os dados originais do STATA usamos o pacote **foreign**.
+
+```{r, warning=FALSE, message=FALSE}
+library(foreign)
+library(survey)
+library(sampling)
+hospitals <- read.dta("hospitals.dta")
+```
+
+Observando algumas medidas descritivas.
+
+```{r}
+dim(hospitals)
+summary(hospitals$beds)
+sum(hospitals$beds)
+summary(hospitals$bedocup)
+sum(hospitals$bedocup)
+summary(hospitals$revenue)
+sum(hospitals$revenue)
+summary(hospitals$spending)
+sum(hospitals$spending)
+```
+
+Os pesos amostrais são todos iguais na AAS:
+$$N/n = 338/50 = 6,76$$
+
+Um bom pacote para selecionar amostrar é o `sampling`.
+Vamos retirar uma amostra por AAS:
+
+```{r}
+set.seed(50)
+AAS <- sample(nrow(hospitals), 50, replace=F)
+amostra <- hospitals[AAS,]
+weights <- 338/50
+amostra <- cbind(amostra, weights, N=338)
+```
+
+Verificando estatísticas descritivas da amostra:
+
+```{r}
+summary(amostra$beds)
+```
+
+Estimando os totais populacionais pela amostra considerando desenho amostral. Primeiro, usamos o comando `svydesign` para declarar o desenho amostral. 
+
+```{r}
+AAS_svy <- svydesign(ids= ~1, fpc = ~N, weight=~weights, data=amostra)
+#Verificando o total considerando o desenho da amostra
+esttotal <- svytotal(~beds + ~bedocup + ~revenue + ~spending, design=AAS_svy); esttotal
+confint(esttotal)
+cv(esttotal)
+```
+
+Investigando uma razão estimada.
+
+```{r}
+sum(hospitals$bedocup)/sum(hospitals$beds)
+svyratio(~bedocup, ~beds, AAS_svy)
+confint(svyratio(~bedocup, ~beds, AAS_svy))
+```
+
+Verificando a proporção de hospitais com menos de 40 leitos.
+
+```{r, warning=FALSE}
+library(descr)
+library(magrittr)
+hospitals$y <- ifelse(hospitals$beds<=40, 1, 0)
+freq(hospitals$y, plot=F) # Populacional
+amostra$y <- ifelse(amostra$beds<=40, 1, 0)
+amostra$y %<>% as.factor
+svytable(~y, AAS_svy) # Na amostra
+svymean(~y, AAS_svy); confint(svymean(~y, AAS_svy))
+cv(svymean(~y, AAS_svy)) # IBGE threshold 0.15
+```
+
+## Estimando a Margem de erro
+
+A margem de erro permite avaliar a qualidade e incerteza das estimativas amostrais, caso a caso. Ela diminui com o aumento da amostra.
+
+$$ Margem de erro ~= 2 \times ErroPadrão da Estimativa $$
+
+```{r}
+2*0.0646 # Margem de erro
+```
+
+O coeficiente de variação é calculado por 
+
+$$ CV ~= 100 \times Erro Padrão da Estimativa/Estimativa$$.
+
+```{r}
+100*(0.0646/0.4) # CV
+```
+
+A margem de erro relativo é calculada por 
+
+$$Margem de erro relativo ~= 2 \times CV $$
+```{r}
+2*16.15
+```
