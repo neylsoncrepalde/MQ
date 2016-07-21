@@ -1,0 +1,57 @@
+---
+title: "MQ - Amostragem - Aula 4"
+author: "Neylson Crepalde"
+date: "21 de julho de 2016"
+output:
+  pdf_document: default
+  html_document:
+    highlight: tango
+---
+
+##Trabalhando com amostra estratificada
+
+```{r, warning=FALSE,message=FALSE}
+library(foreign)
+library(survey)
+library(descr)
+library(magrittr)
+library(dplyr)
+setwd("~/Documentos/Neylson Crepalde/MQ/Amostragem")
+hospitals <- read.dta("hospitals.dta")
+```
+
+Primeiro, vamos retirar uma amostra aleatória simples com reposição para cada estrato (amostra estratiicada). Em seguida, vamos adicionar 3 colunas ao banco de dados da amostra, a saber, o valor de $N$, as proporções de cada estrato na população, as proporções de cada estrato na amostra para calcular os pesos amostrais adequados à amostra estratificada.
+
+```{r,warning=FALSE}
+summary(hospitals$bedocup)
+by_class <- hospitals %>% group_by(class)
+samp <- sample_frac(by_class, .145, replace = T)
+freq(hospitals$class,plot=F);freq(samp$class,plot=F)
+samp %<>% 
+  mutate(N = 338,
+         Nh = 46,
+         nh = 7)
+samp$Nh[samp$class==2] <- 66
+samp$Nh[samp$class==3] <- 55
+samp$Nh[samp$class==4] <- 75
+samp$Nh[samp$class==5] <- 62
+samp$Nh[samp$class==6] <- 34
+samp$nh[samp$class==2] <- 10
+samp$nh[samp$class==3] <- 8
+samp$nh[samp$class==4] <- 11
+samp$nh[samp$class==5] <- 9
+samp$nh[samp$class==6] <- 5
+samp %<>% mutate(weights = Nh/nh)
+```
+
+Agora vamos definir o desenho amostral considerando os estratos e pesos de forma adequada. Dessa forma, o erro padrão das estimativas é reduzido deixando os resultados muito mais precisos.
+
+```{r}
+svy <- svydesign(ids= ~1, fpc = ~N, strata = ~class, 
+                 weight=~weights, data=samp)
+svymean(~bedocup, svy); confint(svymean(~bedocup, svy))
+cv(svymean(~bedocup, svy))
+svytotal(~bedocup, svy); confint(svytotal(~bedocup, svy))
+cv(svytotal(~bedocup, svy))
+```
+
