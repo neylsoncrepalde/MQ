@@ -6,7 +6,7 @@ date: "22 de julho de 2016"
 output: pdf_document
 ---
 
-#Questões 1 a 3
+#Questões 1 a 4
 
 ```{r, warning=FALSE, message=FALSE}
 library(foreign)
@@ -27,15 +27,41 @@ summary(pofrj$BMI)
 pofrj_adult_women <- pofrj[pofrj$sex==2 & pofrj$age>=20 & pofrj$height>0,]
 sdesign <- svydesign(~psu+household, strata = ~stratum, 
                      data = pofrj_adult_women, nest = T, weights = ~weightD2)
+summary(sdesign)
 ```
 
-#Questão 4
+#Questão 5
 
 ```{r}
 #Estimando o modelo normal para a variável BMI
-svymean(~BMI, sdesign); confint(svymean(~BMI, sdesign)) #Média
-svyvar(~BMI, sdesign); confint(svyvar(~BMI, sdesign)) #Variância
-#Verificando o modelo com um histograma
-svyhist(~BMI, sdesign, col="yellow")
+m <- svymean(~BMI, sdesign);m; confint(m) #Média
+v <- svyvar(~BMI, sdesign); v; confint(v) #Variância
 ```
 
+#Questão 6
+
+```{r}
+#Verificando o modelo com um histograma
+x <- pofrj_adult_women$BMI
+svyhist(~BMI, sdesign, col="light blue")
+curve(dnorm(x, mean=24.725, sd=sqrt(23.835)), col="red", lty=2, lwd=2, add=T)
+```
+
+A distribuição da variável está bastante parecida com a "curva normal". A partir do gráfico gerado, é possível argumentar que o modelo normal estimado para a variável "Índice de Massa Corporal" está bem ajustado.
+
+#Questão 7
+
+```{r}
+pofrj_adult_women$sobrepeso <- ifelse(pofrj_adult_women$BMI>25, 1, 0)
+pofrj_adult_women$obeso <- ifelse(pofrj_adult_women$BMI>30, 1, 0)
+sdesign <- svydesign(~psu+household, strata = ~stratum, 
+                     data = pofrj_adult_women, nest = T, weights = ~weightD2)
+
+#Estimando a proporção de mulheres com sobrepeso
+svyciprop(~sobrepeso, sdesign)
+cv(svyciprop(~sobrepeso, sdesign))
+
+#Estimando a proporção de mulheres obesas
+svyciprop(~obeso, sdesign)
+cv(svyciprop(~obeso, sdesign))
+```
