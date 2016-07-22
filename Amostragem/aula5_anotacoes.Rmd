@@ -1,0 +1,43 @@
+---
+title: "MQ - Amostragem - Aula 5"
+author: "Neylson Crepalde"
+date: "Friday, July 22, 2016"
+output: html_document
+---
+
+Trabalhando com dados da POF - RJ
+
+```{r, warning=FALSE, message=FALSE}
+library(foreign)
+library(survey)
+library(magrittr)
+library(descr)
+```
+
+Abrindo o banco de dados.
+
+Só podemos fazer a aproximação de considerar Amostra Aleatória **com reposição** porque no Brasil existiam pelo menos 10 X mais setores censitários do que o numero de setores censitarios considerados na POF.
+
+Vamos verificar preliminarmente algumas variáveis do banco de dados.
+
+```{r}
+pof <- read.dta("C:/Users/Usuario/Desktop/MQ - Amostragem/pofrj.dta")
+freq(pof$sex, plot=F)
+summary(pof$height)
+boxplot(pof$height, col="green", horizontal=T)
+```
+
+Extraindo banco de dados só para homens e estimando um modelo *Normal* para a variavel `height`.
+
+```{r}
+#Extraindo o grupo de interesse
+pof_adult_men <- pof[pof$sex==1 & pof$age>19,]
+#Declarando o desenho amostral
+sdesign <- svydesign(~psu+household, strata=~stratum, data=pof_adult_men, weights=~weightD2)
+
+#Investigando o modelo normal (média e variância)
+svymean(~height, sdesign); confint(svymean(~height, sdesign))
+cv(svymean(~height, sdesign))
+svyvar(~height, sdesign); confint(svyvar(~height, sdesign))
+cv(svyvar(~height, sdesign))
+```
