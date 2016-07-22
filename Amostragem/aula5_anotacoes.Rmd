@@ -2,7 +2,7 @@
 title: "MQ - Amostragem - Aula 5"
 author: "Neylson Crepalde"
 date: "Friday, July 22, 2016"
-output: html_document
+output: pdf_document
 ---
 
 Trabalhando com dados da POF - RJ
@@ -21,7 +21,7 @@ Só podemos fazer a aproximação de considerar Amostra Aleatória **com reposi�
 Vamos verificar preliminarmente algumas variáveis do banco de dados.
 
 ```{r}
-pof <- read.dta("C:/Users/Usuario/Desktop/MQ - Amostragem/pofrj.dta")
+pof <- read.dta("~/Documentos/Neylson Crepalde/MQ/Amostragem/pofrj.dta")
 freq(pof$sex, plot=F)
 summary(pof$height)
 boxplot(pof$height, col="green", horizontal=T)
@@ -61,10 +61,16 @@ reg3 <- svyglm(weight~height_m+age+yearstudy, design=sdesign); summary(reg3)
 r <- residuals(reg3)
 yhat <- predict(reg3)
 
+#Gerando gráficos de avaliação do modelo
 par(mfrow=c(2,2)); plot(reg3); par(mfrow=c(1,1))
-ggplot(NULL, aes(x=yhat, y=r))+geom_point()
 
 sqr = r^2
-svymean(~sqr, sdesign)
-stdres = r / sqrt(161.91)
+mean.error <- svymean(~sqr, sdesign)
+stdres = r / sqrt(mean.error)
 ```
+
+```{r, results='asis'}
+texreg::texreg(list(reg,reg2,reg3), single.row=T, caption.above=T,
+               caption="Modelos de Regressão")
+```
+
