@@ -1,0 +1,63 @@
+---
+title: "MQ - Amostragem - Avaliação 1"
+author: "Neylson Crepalde"
+date: "21 de julho de 2016"
+output:
+  pdf_document: default
+  html_document:
+    highlight: tango
+---
+
+#Questão 1
+
+```{r, warning=FALSE, message=FALSE}
+library(foreign)
+library(survey)
+library(dplyr)
+library(magrittr)
+library(descr)
+```
+```{r}
+hospitals <- read.dta("~/Documentos/Neylson Crepalde/MQ/Amostragem/hospitals.dta")
+hos_50    <- read.dta("~/Documentos/Neylson Crepalde/MQ/Amostragem/hospitals_srs50.dta")
+hos_50$N  <- nrow(hospitals)
+AAS       <- svydesign(~1, fpc = ~N, weights = ~weights, data = hos_50)
+svymean(~spending+revenue, AAS); confint(svymean(~spending+revenue, AAS))
+sapply(list(hospitals[[7]],hospitals[[6]]), mean)
+```
+
+Considerando o desenho amostral de uma AAS, o intervalo de confiança da média estimada para a variável `spending` não conteve o parâmetro populacional. Já no caso da variável `revenue`, o intervalo de confiança da média estimada conteve o parâmetro real. Apesar do fato de que a estimação considera o desenho amostral da pesquisa, o que faz dela uma prática mais acurada do que a não consideração do desenho, é possível (em 5% de todas as possíveis amostras) que o intervalo de confiança não contenha o parâmetro.
+
+#Questão 2
+
+```{r}
+hospitals %<>% mutate(profit = (sum(revenue) - sum(spending))/sum(revenue))
+#Estimativa 
+ratio <- svyratio(~I(revenue-spending), ~revenue, AAS); ratio; confint(ratio)
+median(hospitals$profit) # Parâmetro Populacional
+```
+
+No caso da razão de lucro, o intervalo de confiança estimado também contém o parâmetro populacional o que indica que o processo de estimação foi eficiente.
+
+#Questão 3
+
+```{r}
+hospitals$prop = hospitals$bedocup/hospitals$beds
+hospitals$ocupado = ifelse(hospitals$prop>150, 1, 0)
+
+hos_50$prop = hos_50$bedocup/hos_50$beds
+hos_50$ocupado = ifelse(hos_50$prop>150, 1, 0)
+
+#Incluindo as variáveis novas no design amostral
+AAS <- svydesign(~1, fpc = ~N, weights = ~weights, data = hos_50)
+svytable(~ocupado, AAS); svymean(~ocupado, AAS); confint(svymean(~ocupado, AAS))
+
+#Proporção populacional
+freq(hospitals$ocupado, plot=F)
+```
+
+A estimação das proporções considerando o desenho amostral por "Amostragem Aleatória Simples sem reposição" foi eficaz.
+
+#Questão 4
+
+
