@@ -1,0 +1,41 @@
+---
+title: "MQ - Amostragem - Avaliação Prática"
+subtitle: "Prof. Marcel de Toledo Vieira"
+author: "Neylson Crepalde"
+date: "22 de julho de 2016"
+output: pdf_document
+---
+
+#Questões 1 a 3
+
+```{r, warning=FALSE, message=FALSE}
+library(foreign)
+library(survey)
+library(dplyr)
+library(magrittr)
+library(descr)
+```
+```{r}
+#Lendo os dados
+pofrj <- read.dta("~/Documentos/Neylson Crepalde/MQ/Amostragem/pofrj.dta")
+
+#Criando a variável Índice de Massa Corporal (BMI)
+pofrj %<>% mutate(BMI = weight/(height/100)^2)
+summary(pofrj$BMI)
+
+#Extraindo subconjunto de mulheres adultas e com altura medida
+pofrj_adult_women <- pofrj[pofrj$sex==2 & pofrj$age>=20 & pofrj$height>0,]
+sdesign <- svydesign(~household+psu, strata = ~stratum, 
+                     data = pofrj_adult_women, nest = T, weights = ~weightD2)
+```
+
+#Questão 4
+
+```{r}
+#Estimando o modelo normal para a variável BMI
+svymean(~BMI, sdesign); confint(svymean(~BMI, sdesign)) #Média
+svyvar(~BMI, sdesign); confint(svyvar(~BMI, sdesign)) #Variância
+#Verificando o modelo com um histograma
+svyhist(~BMI, sdesign, col="yellow")
+```
+
