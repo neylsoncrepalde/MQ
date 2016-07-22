@@ -25,7 +25,7 @@ summary(pofrj$BMI)
 
 #Extraindo subconjunto de mulheres adultas e com altura medida
 pofrj_adult_women <- pofrj[pofrj$sex==2 & pofrj$age>=20 & pofrj$height>0,]
-sdesign <- svydesign(~household+psu, strata = ~stratum, 
+sdesign <- svydesign(~psu+household, strata = ~stratum, 
                      data = pofrj_adult_women, nest = T, weights = ~weightD2)
 ```
 
