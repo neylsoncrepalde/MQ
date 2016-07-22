@@ -29,7 +29,7 @@ boxplot(pof$height, col="green", horizontal=T)
 
 Extraindo banco de dados só para homens e estimando um modelo *Normal* para a variavel `height`.
 
-```{r}
+```{r, warning=FALSE}
 #Extraindo o grupo de interesse
 pof_adult_men <- pof[pof$sex==1 & pof$age>19,]
 #Declarando o desenho amostral
@@ -40,4 +40,31 @@ svymean(~height, sdesign); confint(svymean(~height, sdesign))
 cv(svymean(~height, sdesign))
 svyvar(~height, sdesign); confint(svyvar(~height, sdesign))
 cv(svyvar(~height, sdesign))
+#svyhist(~height, sdesign)
+```
+
+#Ajustando modelos de regressão considerando a amostragem
+
+```{r, warning=FALSE}
+pof_adult_men$height_m <- pof_adult_men$height/100
+sdesign <- svydesign(~psu+household, strata=~stratum, data=pof_adult_men, weights=~weightD2)
+plot(pof_adult_men$height_m, pof_adult_men$weight, pch=20)
+library(ggplot2)
+ggplot(pof_adult_men, aes(x=height_m, y=weight))+geom_point()+geom_smooth(method="lm")
+
+#Ajustando um modelo
+reg <- svyglm(weight~height_m, design=sdesign); summary(reg)
+reg2 <- svyglm(weight~height_m+age, design=sdesign); summary(reg2)
+reg3 <- svyglm(weight~height_m+age+yearstudy, design=sdesign); summary(reg3)
+
+#Examinando os resíduos
+r <- residuals(reg3)
+yhat <- predict(reg3)
+
+par(mfrow=c(2,2)); plot(reg3); par(mfrow=c(1,1))
+ggplot(NULL, aes(x=yhat, y=r))+geom_point()
+
+sqr = r^2
+svymean(~sqr, sdesign)
+stdres = r / sqrt(161.91)
 ```
