@@ -1,5 +1,6 @@
 ---
 title: "MQ - Amostragem - Avaliação 1"
+subtitle: "Prof. Marcel de Toledo Vieira"
 author: "Neylson Crepalde"
 date: "21 de julho de 2016"
 output:
@@ -60,4 +61,33 @@ A estimação das proporções considerando o desenho amostral por "Amostragem A
 
 #Questão 4
 
+```{r}
+#Agrupando por região
+by_region <- hospitals %>% group_by(region)
+freq(by_region$region, plot=F)
 
+#Extraindo uma amostra estratificada
+samp <- sample_frac(by_region, .145, replace = T)
+freq(samp$region, plot=F)
+
+#Construindo os pesos amostrais por estrato
+samp %<>% 
+  mutate(N = 338,
+         Nh = 123,
+         nh = 18)
+samp$Nh[samp$region==2] <- 39
+samp$Nh[samp$region==3] <- 88
+samp$Nh[samp$region==4] <- 88
+samp$nh[samp$region==2] <- 6
+samp$nh[samp$region==3] <- 13
+samp$nh[samp$region==4] <- 13
+samp %<>% mutate(weights = Nh/nh)
+
+#Estimando a média do nº de leitos ocupados/dia
+AAS.estrat <- svydesign(~1, fpc = ~N, strata=~region, weights = ~weights, data = samp)
+
+svymean(~prop, AAS.estrat); confint(svymean(~prop, AAS.estrat)) # Na amostra
+mean(hospitals$prop) # Populacional
+```
+
+A média estimada na amostra está bastante próxima do parâmetro populacional. A estimação obteve um erro padrão bastante pequeno. Isto se deu devido ao fato de considerarmos, na estimação, o desenho amostral estratificado.
