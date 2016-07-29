@@ -2,6 +2,7 @@
 #Voters
 from turtle import Turtle
 from random import randrange
+from numpy import argmin
 
 class Voter:
     def __init__(self, x, y):
@@ -15,5 +16,10 @@ class Voter:
         turtle.hideturtle()
         turtle.dot()
         
-    def vote(self):
-        return randrange(0,5)
+    def vote(self, politicians):
+        dist = []        
+        for politician in politicians:
+            d = ((politician.x - self.x)**2 + 
+            (politician.y - self.y)**2)**0.5
+            dist.append(d)
+        return argmin(dist)
