@@ -3,42 +3,58 @@
 from politicians import Politician
 from voters import Voter
 from random import randrange
-from random import normalvariate
+from numpy import random
+from numpy import argmax
+import turtle
+
+turtle.tracer(100,0)
+#turtle.setworldcoordinates(0,0,5*101, 5*101)
+
 
 print(1)
- 
 #Alocando os voters
 electorate = []
-for i in range(50):
-    voter_i = Voter(randrange(-200,200),randrange(-200,200))
+for i in range(100):
+    voter_i = Voter(random.normal(0,100),random.normal(0,100))
     electorate.append(voter_i)
 
 print(2)
 #Criando o zoo
-zoo = []
+politicians = []
 for i in range(5):
     politician_i = Politician(randrange(-200,200),randrange(-200,200))
-    zoo.append(politician_i)
+    politicians.append(politician_i)
+
 print(3)
+turtle.tracer(1,0)
 
-#Fazendo o eleitor votar
-result = [0] * 5
-for voter in electorate:
-    v = voter.vote()
-    result[v] = result[v]+1 
-    #Cuidado que a posição do resultado deve ser o voto, não a iteração
+#Colocando x rodadas de eleição
+wins = [0] * len(politicians)
 
-print(result)
+for rodada in range(5):
+    print('round', rodada)
+    #os eleitores votam
+    votes = [0] * len(politicians)
+    for voter in electorate:        
+        v = voter.vote(politicians)
+        votes[v] = votes[v] + 1
+                
+    print(votes)
+    winner = argmax(votes)
+    for i in range(5):
+        if i == winner:
+            politicians[i].readjust_after_election(True, politicians[i])
+        else:
+            politicians[i].readjust_after_election(False, politicians[winner])
+            
+    wins[winner] = wins[winner] + 1
+    print('Politician', winner, 'is the round winner')
     
 
+print(wins)
+election_winner = argmax(wins)
+print('Politician', election_winner, 'won the election')
 
-
-
-#Movendo os políticos
-for i in range(20):
-    for pol in zoo:
-        pol.turtle.goto(randrange(-200,200),randrange(-200,200))
     
-
 while True:
     pass
