@@ -1,5 +1,8 @@
 #ABM
 #START
+#Professor's e-mail
+# davoud@taghawi-nejad.de
+
 from politicians import Politician
 from voters import Voter
 from random import randrange
@@ -14,7 +17,7 @@ turtle.tracer(100,0)
 print(1)
 #Alocando os voters
 electorate = []
-for i in range(100):
+for i in range(500):
     voter_i = Voter(random.normal(0,100),random.normal(0,100))
     electorate.append(voter_i)
 
