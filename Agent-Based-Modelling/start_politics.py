@@ -1,7 +1,5 @@
 #ABM
 #START
-#Professor's e-mail
-# davoud@taghawi-nejad.de
 
 from politicians import Politician
 from voters import Voter
